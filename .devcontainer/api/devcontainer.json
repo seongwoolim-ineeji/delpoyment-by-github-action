@@ -1,0 +1,20 @@
+{
+    "name": "deployment-by-github-action-devcontainer",
+    "dockerComposeFile": "../../docker-compose-dev.yml",
+    "service": "api",
+    "workspaceFolder": "/app",
+
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/app/backend/.pixi/api/bin/python",
+                "python.terminal.activateEnvironment": true    
+                },
+                
+                "extensions": [
+                    "ms-python.python",
+                    "ms-python.vscode-pylance"
+                ]
+            }
+        }
+    }

@@ -1,0 +1,16 @@
+name: deployment-by-github-action
+
+services:
+  api:
+    build:
+      context: ./backend/api
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    working_dir: /app
