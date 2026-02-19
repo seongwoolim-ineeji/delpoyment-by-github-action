@@ -26,4 +26,4 @@ COPY api ./api
 EXPOSE 8000
 
 # src/main.py가 uvicorn.run() 실행
-CMD ["/app/backend/.pixi/api/bin/python", "api/src/main.py"]
+CMD ["/app/backend/.pixi/envs/api/bin/python", "/app/backend/api/src/main.py"]
