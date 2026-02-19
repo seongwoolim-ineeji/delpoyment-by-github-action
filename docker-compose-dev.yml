@@ -3,8 +3,8 @@ name: deployment-by-github-action
 services:
   api:
     build:
-      context: ./backend/api
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: api/Dockerfile
     ports:
       - 8000:8000
     environment:
