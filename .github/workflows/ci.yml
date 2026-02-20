@@ -9,33 +9,35 @@ permissions:
   contents: read
 
 jobs:
-  lint-test-build:
+  lint-test-in-docker:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      # (선택) pixi를 CI에서 쓰는 경우
-      - name: Set up Pixi
-        uses: prefix-dev/setup-pixi@v0.9.4
-        with:
-          manifest-path: backend/pixi.toml
-          locked: true
-          cache: true
-          cache-write: false
+      - name: Build dev image
+        run: docker build -f backend/api/Dockerfile-dev -t backend-dev:ci ./backend
 
-      - name: Ruff lint
-        working-directory: backend
-        run: pixi run ruff check .
+      - name: Ruff lint (in container)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/backend:/workspace" \
+            -w /workspace \
+            backend-dev:ci \
+            pixi run ruff check .
 
-      - name: Ruff format check
-        working-directory: backend
-        run: pixi run ruff format --check .
+      - name: Ruff format check (in container)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/backend:/workspace" \
+            -w /workspace \
+            backend-dev:ci \
+            pixi run ruff format --check .
 
-      - name: Pytest
-        working-directory: backend
-        run: pixi run pytest -q
-
-      # (선택) Docker build 검증만 (push 없음)
-      - name: Docker build (no push)
-        run: docker build -f backend/api/Dockerfile.prod -t ci-test-image:pr ./backend
+      - name: Pytest (in container)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/backend:/workspace" \
+            -w /workspace \
+            backend-dev:ci \
+            pixi run pytest -q
