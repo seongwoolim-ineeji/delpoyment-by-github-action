@@ -1,0 +1,19 @@
+name: deployment-by-github-action
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: api/Dockerfile-dev
+      target: dev
+      args:
+        BASE_IMAGE: python:3.10-slim
+    ports:
+      - 8080:8080
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    working_dir: /app
