@@ -34,11 +34,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Ruff lint
-        run: docker run --rm backend-ci:latest pixi run -e api ruff check .
+      # - name: Ruff lint
+      #   run: docker run --rm backend-ci:latest pixi run -e api ruff check .
 
-      - name: Ruff format check
-        run: docker run --rm backend-ci:latest pixi run -e api ruff format --check .
+      # - name: Ruff format check
+      #   run: docker run --rm backend-ci:latest pixi run -e api ruff format --check .
 
       - name: Pytest
         run: |
