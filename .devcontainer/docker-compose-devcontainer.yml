@@ -3,7 +3,7 @@ name: deployment-by-github-action
 services:
   api:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: api/Dockerfile-dev
       target: dev
       args:
