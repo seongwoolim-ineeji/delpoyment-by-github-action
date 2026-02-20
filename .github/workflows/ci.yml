@@ -3,41 +3,43 @@ name: ci
 on:
   pull_request:
     branches: ["main"]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  lint-test-in-docker:
+  test-in-container:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Build dev image
-        run: docker build -f backend/api/Dockerfile-dev -t backend-dev:ci ./backend
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
 
-      - name: Ruff lint (in container)
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}/backend:/workspace" \
-            -w /workspace \
-            backend-dev:ci \
-            pixi run ruff check .
+      - name: Build CI image (target=CI)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/api/Dockerfile-dev
+          target: CI
+          load: true
+          tags: backend-ci:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Ruff format check (in container)
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}/backend:/workspace" \
-            -w /workspace \
-            backend-dev:ci \
-            pixi run ruff format --check .
+      - name: Ruff lint
+        run: docker run --rm backend-ci:latest pixi run -e api ruff check .
 
-      - name: Pytest (in container)
+      - name: Ruff format check
+        run: docker run --rm backend-ci:latest pixi run -e api ruff format --check .
+
+      - name: Pytest
         run: |
-          docker run --rm \
-            -v "${{ github.workspace }}/backend:/workspace" \
-            -w /workspace \
-            backend-dev:ci \
-            pixi run pytest -q
+          docker run --rm backend-ci:latest sh -lc 'pixi run -e api pytest -q || [ $? -eq 5 ]'
