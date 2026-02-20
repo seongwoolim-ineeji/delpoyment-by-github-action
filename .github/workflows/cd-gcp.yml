@@ -7,23 +7,16 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # WIF(OIDC) 인증에 필요
+  id-token: write
 
 env:
-  # ⚠️ "프로젝트 번호"가 아니라 "프로젝트 ID"를 Secrets에 넣어야 함
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
-  # 서울 리전(원하면 변경)
   GAR_LOCATION: asia-northeast3
   CLOUD_RUN_REGION: asia-northeast3
 
-  # Artifact Registry의 "리포지토리 이름" (GCP에서 1회 생성 필요)
   GAR_REPOSITORY: delpoyment-by-github-action
-
-  # Cloud Run 서비스명(원하면 변경)
   CLOUD_RUN_SERVICE: delpoyment-by-github-action-api
-
-  # 이미지 이름(원하면 변경)
   IMAGE_NAME: api
 
 jobs:
@@ -32,33 +25,28 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5 :contentReference[oaicite:1]{index=1}
+        uses: actions/checkout@v5
 
-      # 1) GitHub OIDC -> Google Cloud 인증 (WIF)
       - name: Auth to Google Cloud (WIF)
-        uses: google-github-actions/auth@v3 :contentReference[oaicite:2]{index=2}
+        uses: google-github-actions/auth@v3
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      # 2) gcloud 설치
       - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v2 :contentReference[oaicite:3]{index=3}
+        uses: google-github-actions/setup-gcloud@v2
 
-      # 3) Docker가 Artifact Registry로 push 할 수 있게 설정
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker "${{ env.GAR_LOCATION }}-docker.pkg.dev" --quiet
 
-      # 4) 이미지 경로/태그 계산 (SHA + latest)
       - name: Set image variables
         run: |
           IMAGE_BASE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}"
           echo "IMAGE_SHA=${IMAGE_BASE}:${GITHUB_SHA}" >> $GITHUB_ENV
           echo "IMAGE_LATEST=${IMAGE_BASE}:latest" >> $GITHUB_ENV
 
-      # 5) 빌드 + Artifact Registry 푸시
       - name: Build and push (GAR)
         uses: docker/build-push-action@v6
         with:
@@ -71,9 +59,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # 6) Cloud Run 배포 (SHA 태그로 배포해서 “어떤 커밋이 배포됐는지” 추적 쉬움)
       - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v3 :contentReference[oaicite:4]{index=4}
+        uses: google-github-actions/deploy-cloudrun@v3
         with:
           service: ${{ env.CLOUD_RUN_SERVICE }}
           region: ${{ env.CLOUD_RUN_REGION }}
