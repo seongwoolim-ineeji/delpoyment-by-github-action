@@ -12,7 +12,11 @@ fastapi = ">=0.129.0,<0.130"
 
 [environments]
 api = ["api"]
+api-ci = ["ci"]
 
 [feature.api.dependencies]
 uvicorn = "*"
 ruff = "*"
+
+[feature.ci.dependencies]
+pytest = "*"

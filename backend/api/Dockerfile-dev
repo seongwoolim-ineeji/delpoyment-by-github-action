@@ -15,7 +15,7 @@ FROM base As ci
 WORKDIR /app/backend
 
 COPY pixi.toml pixi.lock ./
-RUN pixi install -e api --frozen
+RUN pixi install -e api-ci --frozen
 
 COPY api ./api
 
