@@ -1,6 +1,6 @@
 {
     "name": "deployment-by-github-action-devcontainer",
-    "dockerComposeFile": "../../docker-compose-dev.yml",
+    "dockerComposeFile": "../../docker-compose-devcontainer.yml",
     "service": "api",
     "workspaceFolder": "/app",
     "mounts": [
