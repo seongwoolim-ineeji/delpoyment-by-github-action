@@ -1,9 +1,10 @@
 {
     "name": "deployment-by-github-action-devcontainer",
-    "dockerComposeFile": "../../docker-compose-dev.yml",
+    "dockerComposeFile": "../../docker-compose-devcontainer.yml",
     "service": "api",
     "workspaceFolder": "/app",
     "mounts": [
+        "source=deployment-by-github-action-api-envs,target=/app/backend/.pixi/envs/api,type=volume",
         "source=${localEnv:USERPROFILE}\\.ssh,target=/root/.ssh-host,type=bind,consistency=cached,readonly"
     ],
     "postCreateCommand": "set -e; cd /app/backend; pixi clean; pixi clean cache --yes; pixi install -e api --frozen; mkdir -p /root/.ssh; cp -f /root/.ssh-host/id_ed25519 /root/.ssh/id_ed25519; chmod 600 /root/.ssh/id_ed25519; ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null || true; printf '%s\\n' 'Host github.com' '  User git' '  IdentityFile /root/.ssh/id_ed25519' '  IdentitiesOnly yes' '  IdentityAgent none' > /root/.ssh/config; chmod 600 /root/.ssh/config",

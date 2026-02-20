@@ -1,10 +1,24 @@
-FROM python:3.10-slim
+ARG BASE_IMAGE=python:3.10-slim
+
+FROM $BASE_IMAGE As base
 ENV TZ=Asia/Seoul
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl bash procps ca-certificates git openssh-client && rm -rf /var/lib/apt/lists/*
 
 RUN update-ca-certificates
 
 RUN curl -fsSL https://pixi.sh/install.sh | PIXI_BIN_DIR=/usr/local/bin PIXI_NO_PATH_UPDATE=1 bash
+
+FROM base As ci
+WORKDIR /app/backend
+
+COPY pixi.toml pixi.lock ./
+RUN pixi install -e api-ci --frozen
+
+COPY api ./api
+
+FROM base As dev
 
 CMD ["sleep", "infinity"]
