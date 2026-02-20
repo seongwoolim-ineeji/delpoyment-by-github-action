@@ -42,4 +42,4 @@ jobs:
 
       - name: Pytest
         run: |
-          docker run --rm backend-ci:latest sh -lc 'pixi run -e api pytest -q || [ $? -eq 5 ]'
+          docker run --rm backend-ci:latest sh -lc 'pixi run -e api-ci pytest -q || [ $? -eq 5 ]'
